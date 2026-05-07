@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
+use App\Models\Event;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -13,7 +14,23 @@ class EventController extends Controller
      */
     public function index()
     {
-        //
+        $events = Event::where('started_at', '>', now())->get();
+
+        return view('events.index', compact('events'));
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function archives()
+    {
+        $this->authorize('viewArchived', Event::class);
+
+        $events = Event::onlyTrashed()
+            ->where('created_by', Auth::id())
+            ->get();
+
+        return view('events.archives', compact('events'));
     }
 
     /**
@@ -21,7 +38,9 @@ class EventController extends Controller
      */
     public function create()
     {
-        //
+        $this->authorize('create', Event::class);
+
+        return view('events.create');
     }
 
     /**
@@ -29,7 +48,16 @@ class EventController extends Controller
      */
     public function store(StoreEventRequest $request)
     {
-        //
+        $this->authorize('create', Event::class);
+
+        $data = $request->validated();
+
+        Event::create([
+            ...$data,
+            'created_by' => Auth::id()
+        ]);
+
+        return redirect()->route('events.index');
     }
 
     /**
@@ -37,7 +65,7 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        //
+        return view('events.show', compact('event'));
     }
 
     /**
@@ -45,7 +73,9 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
-        //
+        $this->authorize('update', $event);
+
+        return view('events.edit', compact('event'));
     }
 
     /**
@@ -53,14 +83,48 @@ class EventController extends Controller
      */
     public function update(UpdateEventRequest $request, Event $event)
     {
-        //
+        $this->authorize('update', $event);
+
+        $data = $request->validated();
+
+        $event->update($data);
+
+        return redirect()->route('events.index');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Archive the specified resource from storage.
      */
-    public function destroy(Event $event)
+    public function archive(Event $event)
     {
-        //
+        $this->authorize('archive', $event);
+
+        $event->delete();
+
+        return redirect()->route('events.index');
+    }
+
+    /**
+     * Restore the specified resource from storage.
+     */
+    public function restore(Event $event)
+    {
+        $this->authorize('restore', $event);
+
+        $event->restore();
+
+        return redirect()->route('events.index');
+    }
+
+    /**
+     * Force delete the specified resource from storage.
+     */
+    public function forceDelete(Event $event)
+    {
+        $this->authorize('forceDelete', $event);
+
+        $event->forceDelete();
+
+        return redirect()->route('events.index');
     }
 }

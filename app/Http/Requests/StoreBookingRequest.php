@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBookingRequest extends FormRequest
@@ -12,18 +11,17 @@ class StoreBookingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check();
+
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'event_id' => ['required', 'exists:events,id'],
+            'ticket_type_id' => ['required', 'exists:ticket_types,id'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:10'],
+            'status' => ['sometimes', 'in:pending,paid,cancelled'],
         ];
     }
 }

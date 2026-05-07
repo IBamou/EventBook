@@ -22,8 +22,6 @@ return new class extends Migration
             $table->string('image');
             $table->string('slug')->unique();
             $table->boolean('is_published')->default(false);
-            $table->integer('max_attendees')->nullable();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

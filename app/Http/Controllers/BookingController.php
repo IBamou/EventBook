@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
 use App\Http\Requests\StoreBookingRequest;
-use App\Http\Requests\UpdateBookingRequest;
+use App\Models\Booking;
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
@@ -13,15 +13,16 @@ class BookingController extends Controller
      */
     public function index()
     {
-        //
+        $bookings = Booking::where('reserved_by', Auth::id())->get();
+
+        return view('bookings.index', compact('bookings'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(Booking $booking)
     {
-        //
+        $this->authorize('view', $booking);
+
+        return view('bookings.show', compact('booking'));
     }
 
     /**
@@ -29,38 +30,12 @@ class BookingController extends Controller
      */
     public function store(StoreBookingRequest $request)
     {
-        //
-    }
+        $data = $request->validated();
+        $data['reserved_by'] = Auth::id();
+        $data['status'] = 'pending';
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Booking $booking)
-    {
-        //
-    }
+        Booking::create($data);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Booking $booking)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateBookingRequest $request, Booking $booking)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Booking $booking)
-    {
-        //
+        return redirect()->route('bookings.index');
     }
 }

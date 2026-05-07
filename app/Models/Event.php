@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['title', 'description', 'date', 'started_at', 'end_at', 'location', 'image', 'slug', 'is_published', 'max_attendees', 'user_id'])]
+#[Fillable(['title', 'description', 'date', 'started_at', 'end_at', 'location', 'image', 'slug', 'is_published', 'created_by', 'reservation_opens_at', 'reservation_closes_at', 'max_reservations'])]
 
 class Event extends Model
 {
@@ -26,8 +26,8 @@ class Event extends Model
         return $this->hasMany(Booking::class);
     }
 
-    public function user(): BelongsTo
+    public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
