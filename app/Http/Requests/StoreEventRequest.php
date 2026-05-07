@@ -12,18 +12,25 @@ class StoreEventRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return auth()->check();
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'date' => ['required', 'date'],
+            'started_at' => ['required', 'date'],
+            'end_at' => ['nullable', 'date', 'after:started_at'],
+            'location' => ['required', 'string', 'max:255'],
+            'image' => ['nullable', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'max:255', 'unique:events,slug'],
+            'is_published' => ['boolean'],
+            'created_by' => ['required', 'exists:users,id'],
+            'reservation_opens_at' => ['nullable', 'date'],
+            'reservation_closes_at' => ['nullable', 'date'],
+            'max_reservations' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }

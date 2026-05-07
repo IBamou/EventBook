@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Event;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class EventPolicy
 {
@@ -13,7 +12,7 @@ class EventPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -21,7 +20,15 @@ class EventPolicy
      */
     public function view(User $user, Event $event): bool
     {
-        return false;
+        return true;
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function viewArchived(User $user): bool
+    {
+        return in_array($user->role, ['admin', 'organizer']);
     }
 
     /**
@@ -29,7 +36,7 @@ class EventPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'organizer']);
     }
 
     /**
@@ -37,15 +44,15 @@ class EventPolicy
      */
     public function update(User $user, Event $event): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'organizer']) && $user->is($event->createdBy);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Event $event): bool
+    public function archive(User $user, Event $event): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'organizer']) && $user->is($event->createdBy);
     }
 
     /**
@@ -53,7 +60,8 @@ class EventPolicy
      */
     public function restore(User $user, Event $event): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'organizer']) && $user->is($event->createdBy);
+
     }
 
     /**
@@ -61,6 +69,6 @@ class EventPolicy
      */
     public function forceDelete(User $user, Event $event): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'organizer']) && $user->is($event->createdBy);
     }
 }
