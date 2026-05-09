@@ -54,7 +54,7 @@ class EventController extends Controller
 
         Event::create([
             ...$data,
-            'created_by' => Auth::id()
+            'created_by' => Auth::id(),
         ]);
 
         return redirect()->route('events.index');
@@ -111,6 +111,8 @@ class EventController extends Controller
     {
         $this->authorize('restore', $event);
 
+        $event = Event::withTrashed()->findOrFail($event->id);
+
         $event->restore();
 
         return redirect()->route('events.index');
@@ -122,6 +124,8 @@ class EventController extends Controller
     public function forceDelete(Event $event)
     {
         $this->authorize('forceDelete', $event);
+        
+        $event = Event::withTrashed()->findOrFail($event->id);
 
         $event->forceDelete();
 
